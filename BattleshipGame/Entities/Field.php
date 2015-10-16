@@ -13,11 +13,11 @@ use BattleshipGame\Config\Game;
 class Field
 {
 	protected $_ships = [];
+	protected $_hits = [];
+	protected $_miss = [];
 	protected $_fieldMatrix;
 	protected $_colLabel;
 	protected $_rowLabel;
-	protected $_hits = [];
-	protected $_miss = [];
 	
 	public function __construct()
 	{
@@ -48,7 +48,15 @@ class Field
 	 */
 	private function setColLabel($colSize)
 	{
-		$this->_colLabel = range(1, $colSize);
+		$number = range(1, $colSize);
+		foreach($number as $key => $val)
+		{
+			$lastDigit = $val % 10;
+			$number[$key] = $lastDigit;
+		}
+
+		$this->_colLabel = $number;
+
 	}
 
 	/**

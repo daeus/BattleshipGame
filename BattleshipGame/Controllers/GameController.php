@@ -109,15 +109,14 @@ class GameController
 
 	/**
 	 * @todo
-	 * @param array $coordinate
+	 * @param array $input
 	 * @return array
 	 */
-	private function _validateInput($coordinate)
+	private function _validateInput($input)
 	{
-		if($coordinate[0])
-		{
-		
-		}
+		$input_array = str_split($input, 1);
+		$is_alphabet = in_array($this->_field->);
+
 		return true;
 	}
 
@@ -135,19 +134,24 @@ class GameController
 		}
 
 		$this->_inputCoordinates = $this->_translateInput($this->_userInput);
-		$this->
 	}
 
 	/**
-	 * @todo 
+	 * @param string $input
+	 * @return array
 	 */
-	private function _translateInput()
+	private function _translateInput($input)
 	{
-	
+		$input_array = str_split($input);
+		$input_coord[0] = ord(strtoupper($input_array[0])) - ord('A') + 1;
+		$input_coord[1] = (isset($input_array[2]))? $input_array[1] . $input_array[2]: $input_array[1];
+		$input_coord[1] = ($input_coord[1] == 0)? 10:$input_coord[1];
+
+		return $input_coord;
 	}
 
 	/**
-	 * @todo
+	 * @return string
 	 */
 	private function _fieldToHTML()
 	{
@@ -163,30 +167,28 @@ class GameController
 		$html .= '<br />';
 		for($i = 1; $i <= Game::ROW_SIZE; $i++)
 		{
-			$html .= $rowLabel[];
-			for($j = 1; $j <= Game::COL_SIZE; $j++)
-			{
-			
-			} 
-		} 
+			$html .= $rowLabel[$i - 1];
 
-		foreach($matrix as $row)
-		{
-			foreach($row as $elem)
-				$html .= $elem;
+			for($j = 1; $j <= Game::COL_SIZE; $j++)
+				$html .= $matrix[$i][$j];
 
 			$html .= '<br />';
-		}
+		} 
+
+		return $html;
 
 	}
 
 	/**
-	 * @todo
+	 * @return string
 	 */
 	private function _renderHTMLTemplate()
 	{
 		$html = file_get_contents(self::TEMPLATE_FILE);
-		$html = str_replace(self::TEMPLATE_STATUS_TAG, $this->$_outputStatus);
-		$html = str_replace(self::TEMPLATE_FIELD_TAG, $this->$_field->);
+		$html = str_replace(self::TEMPLATE_STATUS_TAG, $this->$_outputStatus, $html);
+		$html = str_replace(self::TEMPLATE_FIELD_TAG, $this->_fieldToHTML(), $html);
+		$html = str_replace(self::TEMPLATE_ENTER_TAG, $this->$_outputEnter, $html);
+
+		echo $html;
 	}
 }
