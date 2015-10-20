@@ -1,3 +1,1 @@
-version alpha
-
-80% done
+Incomplete project
