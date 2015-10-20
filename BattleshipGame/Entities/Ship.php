@@ -4,7 +4,7 @@
  * @author Daeus
  */
 
-namespace BattleshipGame\Entities
+namespace BattleshipGame\Entities;
 
 use BattleshipGame\Config\Game;
 
@@ -27,10 +27,9 @@ class Ship
 	{
 		$instance = new self();
 		$instance->setSize(count($coordinates));
-		$instance->setName(Game::SHIP_NAME[$instance->getSize()]);
+		$instance->setName(Game::$SHIP_NAME[$instance->getSize()]);
 		$instance->setCoordinates($coordinates);
 		return $instance;
-
 	}
 
 	/**
@@ -42,7 +41,7 @@ class Ship
 	public static function createNewShip($shipSize, $fieldRow, $fieldCol)
 	{
 		$instance = new self();
-		$instance->setName(Game::SHIP_NAME[$shipSize]);
+		$instance->setName(Game::$SHIP_NAME[$shipSize]);
 		$instance->setSize($shipSize);
 		$instance->setCoordinates($instance->randomPlaceShip($shipSize, $fieldRow, $fieldCol));
 		
@@ -76,9 +75,9 @@ class Ship
 		{
 			if($isHorizontal)
 			{
-				$coordinates[] = array($startPoint[0], $startPoint[0] + $i); 
+				$coordinates[] = array($startPoint[0], $startPoint[1] + $i); 
 			} else {
-				$coordinates[] = array($startPoint[0] + $i, $startPoint[0]); 
+				$coordinates[] = array($startPoint[0] + $i, $startPoint[1]); 
 			
 			}
 		}
@@ -134,7 +133,7 @@ class Ship
 	 */
 	public function getCoordinates()
 	{
-		return $this->_coordinates();
+		return $this->_coordinates;
 	}
 
 	/**

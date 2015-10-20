@@ -14,11 +14,12 @@ use BattleshipGame\Config\Game;
 class GameController
 {
 
-	const TEMPLATE_FILE = 'Battleship/Templates/game_field.html';
+	const TEMPLATE_FILE = 'BattleshipGame/Templates/game_field.html';
 	const TEMPLATE_STATUS_TAG = '[%STATUS%]';
 	const TEMPLATE_FIELD_TAG = '[%FIELD%]';
 	const TEMPLATE_ENTER_TAG = '[%ENTER%]';
 	protected $_field; // object
+	protected $_fieldMatrix;
 	protected $_gameData;
 	protected $_ships;
 	protected $_miss;
@@ -30,33 +31,49 @@ class GameController
 
 	public function __construct()
 	{
+		error_reporting(E_ALL);
+		ini_set('display_errors', '1'); 
+
 		$this->_outputStatus = '';
 		$this->_outputEnter = sprintf(Lang::USER_INPUT_FORM, Lang::ENTER_TEXT);
+
+		$this->_userInput = isset($_POST['command'])? strtoupper($_POST['command']) : '';
 	}
 
-	public static function getInstance()
+	/**
+	 * 
+	 */
+	public function start()
 	{
-		if(isset($_COOKIE[Game::COOKIE_KEY]))
+		if($this->_userInput === 'RESTART'){
+			$this->deleteSavedGame();		
+		}
+
+		if(isset($_COOKIE[Game::COOKIE_KEY]) && $this->_userInput === 'SHOW')
 		{
+			$this->loadGame();
+
+		} elseif(isset($_COOKIE[Game::COOKIE_KEY])){
 			$this->loadGame();	
 			$this->_processInput();
-			$this->_renderHTMLTemplate();
 		} else {
 			$this->startNewGame();
-			$this->_renderHTMLTemplate();
 		}
+
+		$this->_renderHTMLTemplate();
 	}
 
 	/**
 	 * Load Saved Game
-	 * return void
+	 * @return void
 	 */
 	public function loadGame()
 	{
 		$this->_gameData = json_decode($_COOKIE[Game::COOKIE_KEY]);
-		$ship = $this->_gameData['ships'];
-		$miss = $this->_gameData['miss'];
-		$hits = $this->_gameData['hits'];
+
+		$ship = $this->_gameData->ships;
+		$miss = $this->_gameData->miss;
+		$hits = $this->_gameData->hits;
 
 		$this->_field = Field::loadField($ship, $hits, $miss);
 	}
@@ -73,8 +90,11 @@ class GameController
 		// Place ships according to setting
 		for($i = 1; $i <= 5; $i++)
 		{
-			for($j = 0; $j < Game::NO_OF_SHIP[$i]; $j++)	
-				$this->_field->addNewShip();
+			for($j = 0; $j < Game::$NO_OF_SHIP[$i]; $j++)	
+			{
+				$this->_field->addNewShip($i);
+			}
+			
 		}
 
 		// save game data
@@ -104,20 +124,19 @@ class GameController
 		$gameData['miss'] = $this->_field->getMiss();
 		$gameData['hits'] = $this->_field->getHits();
 
+		print_r($gameData);
 		setcookie(Game::COOKIE_KEY, json_encode($gameData));
 	}
 
 	/**
-	 * @todo
+	 * @todo phase 2: change the regex according to game setting
+	 *
 	 * @param array $input
 	 * @return array
 	 */
 	private function _validateInput($input)
 	{
-		$input_array = str_split($input, 1);
-		$is_alphabet = in_array($this->_field->);
-
-		return true;
+		return preg_match('/[A-J][0-9]{1,2}/', $input);
 	}
 
 	/**
@@ -125,15 +144,22 @@ class GameController
 	 */
 	private function _processInput()
 	{
-		$this->_userInput = isset($_POST['command']) ? $_POST['command'] : '';
-
-		if($this->_validateInput($this->_userInput))
+		// Validate input
+		if(!$this->_userInput)
+		{
+			return;
+		} 
+		elseif(!$this->_validateInput($this->_userInput))
 		{
 			$this->_outputStatus = Lang::INVALID_INPUT;
 			return;
 		}
 
+		// translate input to be mechine readable coordinates
 		$this->_inputCoordinates = $this->_translateInput($this->_userInput);
+
+		// process input
+
 	}
 
 	/**
@@ -155,10 +181,9 @@ class GameController
 	 */
 	private function _fieldToHTML()
 	{
-
 		$matrix = $this->_field->getFieldMatrix();
-		$colLabel = $this->_field->getColLable();
-		$rowLabel = $this->_field->getRowLable();
+		$colLabel = $this->_field->getColLabel();
+		$rowLabel = $this->_field->getRowLabel();
 
 		$html = '&nbsp;';
 		foreach($colLabel as $elemColLabel)
@@ -185,9 +210,9 @@ class GameController
 	private function _renderHTMLTemplate()
 	{
 		$html = file_get_contents(self::TEMPLATE_FILE);
-		$html = str_replace(self::TEMPLATE_STATUS_TAG, $this->$_outputStatus, $html);
+		$html = str_replace(self::TEMPLATE_STATUS_TAG, $this->_outputStatus, $html);
 		$html = str_replace(self::TEMPLATE_FIELD_TAG, $this->_fieldToHTML(), $html);
-		$html = str_replace(self::TEMPLATE_ENTER_TAG, $this->$_outputEnter, $html);
+		$html = str_replace(self::TEMPLATE_ENTER_TAG, $this->_outputEnter, $html);
 
 		echo $html;
 	}

@@ -5,7 +5,7 @@
  * @author Daeus
  */
 
-namespace BattleshipGame\Entities
+namespace BattleshipGame\Entities;
 
 use BattleshipGame\Config\FieldTerm;
 use BattleshipGame\Config\Game;
@@ -106,25 +106,38 @@ class Field
 		{
 			$isPlaced = false;
 			$count = 0; 
-			while(!$isPlace && $count < 50)
+			
+			// count to prevent infinite loop
+			while(!$isPlaced && $count < 50)
 			{
 				$ship = Ship::createNewShip($size, Game::ROW_SIZE, Game::COL_SIZE);
+
+				// check if the ship overlapped
+				$isOverlapped = false;
 				foreach($this->_ships as $placedShip)
 				{
 					if($ship->isOverlap($placedShip))
 					{
-						unset($ship);
-					} else {
-						$this->_ships[] = $ship;
-						$isPlaced = true;
+						$isOverlapped = true;
+						break;
 					}
 				}
+
+				if(!$isOverlapped)
+				{
+					$this->_ships[] = $ship;
+					$isPlaced = true;
+				}
+
 				$count++;
 			}
 		
 		} else {
+			$ship = Ship::createNewShip($size, Game::ROW_SIZE, Game::COL_SIZE);
 			$this->_ships[] = $ship; 
 		}
+
+		unset($ship);
 	}
 
 	/**
@@ -189,7 +202,7 @@ class Field
 	 */
 	private function _draw()
 	{
-		$this->_fieldMatrix = array_fill(1, Game::ROW_SIZE, array_fill(1, Game::COL_SIZE, FieldTerm:NO_SHOT));
+		$this->_fieldMatrix = array_fill(1, Game::ROW_SIZE, array_fill(1, Game::COL_SIZE, FieldTerm::NO_SHOT));
 		if(!empty($this->_miss)){
 			foreach($this->_miss as $miss)
 			{
@@ -204,7 +217,6 @@ class Field
 				$this->_fieldMatrix[$hit[0]][$hit[1]] = FieldTerm::HIT_SHOT;
 			}
 		}
-
 	}
 
 	/**
@@ -214,6 +226,15 @@ class Field
 	{
 		$this->_draw();
 		return $this->_fieldMatrix;
+	}
+
+	/**
+	 * @todo
+	 * @return array
+	 */
+	public function getShipMatrix()
+	{
+	
 	}
 
 	/**

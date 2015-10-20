@@ -11,9 +11,6 @@ class Lang{
 	const MISS = 'Miss';
 	const SUNK = 'Sunk! ';
 	const HIT = 'Hit! ';
+	const END_OF_GAME = 'Well done! You completed the game in %s shots. ';
 
-	public static function END_OF_GAME($shots)
-	{
-		return "Well done! You completed the game in {$shots} shots. ";
-	}
 }

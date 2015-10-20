@@ -6,18 +6,23 @@ class Game{
 
 	const COOKIE_KEY = 'BattleshipGame';
 	const SESSION_KEY = 'BattleshipGame';
-	const ROW_SIZE = '10';
-	const COL_SIZE = '10';
-	const SHIP_NAME[1] = 'small ship';
-	const SHIP_NAME[2] = 'medium ship';
-	const SHIP_NAME[3] = 'large ship';
-	const SHIP_NAME[4] = 'destroyer';
-	const SHIP_NAME[5] = 'battleship';
-	const NO_OF_SHIP[1] = 0;
-	const NO_OF_SHIP[2] = 0;
-	const NO_OF_SHIP[3] = 0;
-	const NO_OF_SHIP[4] = 2;
-	const NO_OF_SHIP[5] = 1;
+	const ROW_SIZE = '10'; // Max 10
+	const COL_SIZE = '10'; // Max 10
+	public static $SHIP_NAME = array(
+		1 => 'small ship',
+		2 => 'medium ship',
+		3 => 'large ship',
+		4 => 'destroyer',
+		5 => 'battleship'
+	);
+
+	public static $NO_OF_SHIP = array(
+		1 => 0, 
+		2 => 0, 
+		3 => 0, 
+		4 => 2, 
+		5 => 1, 
+	);
 
 }
 
