@@ -28,6 +28,7 @@ class GameController
 	protected $_inputCoordinates;
 	protected $_outputStatus;
 	protected $_outputEnter;
+	protected $_gameEnded = false;
 
 	public function __construct()
 	{
@@ -61,6 +62,9 @@ class GameController
 		}
 
 		$this->_renderHTMLTemplate();
+
+		if($this->_gameEnded)
+			deleteSavedGame();
 	}
 
 	/**
@@ -69,11 +73,11 @@ class GameController
 	 */
 	public function loadGame()
 	{
-		$this->_gameData = json_decode($_COOKIE[Game::COOKIE_KEY]);
+		$this->_gameData = json_decode($_COOKIE[Game::COOKIE_KEY], true);
 
-		$ship = $this->_gameData->ships;
-		$miss = $this->_gameData->miss;
-		$hits = $this->_gameData->hits;
+		$ship = $this->_gameData['ships'];
+		$miss = $this->_gameData['miss'];
+		$hits = $this->_gameData['hits'];
 
 		$this->_field = Field::loadField($ship, $hits, $miss);
 	}
@@ -124,7 +128,6 @@ class GameController
 		$gameData['miss'] = $this->_field->getMiss();
 		$gameData['hits'] = $this->_field->getHits();
 
-		print_r($gameData);
 		setcookie(Game::COOKIE_KEY, json_encode($gameData));
 	}
 
@@ -136,7 +139,7 @@ class GameController
 	 */
 	private function _validateInput($input)
 	{
-		return preg_match('/[A-J][0-9]{1,2}/', $input);
+		return preg_match('/[A-J](10|[0-9])/', $input);
 	}
 
 	/**
@@ -159,6 +162,31 @@ class GameController
 		$this->_inputCoordinates = $this->_translateInput($this->_userInput);
 
 		// process input
+		$hitShip = $this->_field->isHit($this->_inputCoordinates);
+		if($hitShip)
+		{
+			$this->_field->addHit($this->_inputCoordinates);
+
+			// Won the game
+			if(count($this->_field->getHits) === $this->_field->getShipsLength()) {
+				$this->_gameEnded = true;
+				$this->_outputEnter = sprintf(Lang::END_OF_GAME, $this->_field->countTotalHit()); 
+
+			// Sunk any ship
+			} elseif($hitShip->isSunk($this->_field->getHits())){
+				$this->_outputStatus = sprintf(Lang::SUNK, $hitShip->getName);
+
+			// Just hit
+			} else {
+				$this->_outputStatus = sprintf(Lang::HIT, $hitShip->getName);
+			
+			}
+		} else {
+			$this->_field->addMiss($this->_inputCoordinates);
+			$this->_outputStatus = Lang::MISS;
+		}
+
+		$this->saveGame();
 
 	}
 
@@ -177,9 +205,10 @@ class GameController
 	}
 
 	/**
+	 * @todo addCheatMode
 	 * @return string
 	 */
-	private function _fieldToHTML()
+	private function _fieldToHTML($cheatMode = false)
 	{
 		$matrix = $this->_field->getFieldMatrix();
 		$colLabel = $this->_field->getColLabel();

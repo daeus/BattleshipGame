@@ -97,6 +97,14 @@ class Ship
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->_name;
+	}
+
+	/**
 	 * @param int $size
 	 * @return void
 	 */
@@ -111,10 +119,9 @@ class Ship
 	}
 
 	/**
-	 * @param int $size
-	 * @return void
+	 * @return int
 	 */
-	public function getSize($size)
+	public function getSize()
 	{
 		return $this->_size;
 	}
@@ -150,7 +157,6 @@ class Ship
 			}
 		}
 		return false;
-	
 	}
 
 	/**
@@ -168,7 +174,7 @@ class Ship
 			}
 		}
 
-		return ($countHit == $this->getSize())?true:false;
+		return ($countHit >= $this->getSize())?true:false;
 	}
 
 	/**
@@ -182,5 +188,4 @@ class Ship
 
 		return false;
 	}
-
 }

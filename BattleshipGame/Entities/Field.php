@@ -88,12 +88,12 @@ class Field
 	}
 	
 	/**
-	 * @param object $ship
+	 * @param array $shipCoord
 	 * @return void
 	 */
-	public function addExistingShip($ship)
+	public function addExistingShip($shipCoord)
 	{
-		$this->_ships[] = $ship; 
+		$this->_ships[] = Ship::loadShip($shipCoord); 
 	}
 
 	/**
@@ -164,12 +164,35 @@ class Field
 	}
 
 	/**
+	 * @return int
+	 */
+	public function getShipsLength()
+	{
+		$len = 0;
+		foreach($this->_ships as $ship)
+		{
+			$len += count($ship->getCoordinates());
+		}
+		return $len;
+	}
+
+	/**
 	 * @param array $miss
 	 * @return void
 	 */
 	public function setMiss($miss)
 	{
 		$this->_miss = $miss;
+	}
+
+	/**
+	 * @param array $miss
+	 * @return void
+	 */
+	public function addMiss($hit)
+	{
+		print_r($this->_miss);
+		$this->_miss[$hit[0].$hit[1]] = $hit;
 	}
 
 	/**
@@ -195,6 +218,15 @@ class Field
 	public function getHits()
 	{
 		return $this->_hits;
+	}
+
+	/**
+	 * @param array $miss
+	 * @return void
+	 */
+	public function addHit($hit)
+	{
+		$this->_hits[$hit[0].$hit[1]] = $hit;
 	}
 
 	/**
@@ -238,43 +270,24 @@ class Field
 	}
 
 	/**
-	 * check if the hit is already used
-	 * @param $hit
-	 * @return boolean
-	 */
-	public function isFired($hit)
-	{
-		if($this->_hits)
-		{
-			foreach($this->_hits as $thisHit)
-			{
-				if($thisHit == $hit) return true;
-			}
-		}
-
-		if($this->_miss)
-		{
-			foreach($this->_miss as $thisMiss)
-			{
-				if($thisMiss == $hit) return true;
-			}
-		}
-
-		return false;
-	
-	}
-
-	/**
 	 * @param $hit 
-	 * @return boolean
+	 * @return ship | false
 	 */
-	public function checkHit($hit)
+	public function isHit($hit)
 	{
 		foreach($this->_ships as $ship)
 		{
-			if($ship->isHit($hit)) return true;
+			if($ship->isHit($hit)) return $ship;
 		}
 
 		return false;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function countTotalHit()
+	{
+		return count($this->_hits) + count($this->_miss);
 	}
 }
