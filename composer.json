@@ -1,4 +1,11 @@
 {
-    "require": {
-    }
+    "name": "daeus/BattleshipGame",
+    "description": "Simple PHP web app game",
+    "authors": [
+        {
+            "name": "Daeus Tang",
+            "email": "daeustang@gmail.com"
+        }
+    ],
+    "require": {}
 }
