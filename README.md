@@ -14,9 +14,9 @@ random with the following sizes:
 Ships can touch but they must not overlap.  
 The application will accept input from the user in the format “A5” to signify a square to target, and feedback to the user whether the shot was success, miss, and additionally report on the sinking of any vessels.
 
-. = no shot  
-- = miss  
-X = hit  
+no shot = '.'  
+miss = '-'  
+hit = 'X'    
   
 
 Example output
