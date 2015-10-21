@@ -5,7 +5,7 @@ namespace BattleshipGame\Config;
 class Lang{
 
 	const ENTER_TEXT = 'Enter coordinates (row, col), e.g. A5 = ';
-    const USER_INPUT_FORM = '<form method="post">%s<input type="text" name="command" /><input type="submit" /></form>';
+    const USER_INPUT_FORM = '<form method="post">%s<input type="text" name="command" autofocus /><input type="submit" /></form><br />Type \'show\' to show all the ship and \'restart\' to start a new game. ';
 	const INVALID_INPUT = 'Invalid Input. Please try again. ';
 	const MISS = 'Miss';
 	const SUNK = '%s is sunk! ';

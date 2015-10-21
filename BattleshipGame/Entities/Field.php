@@ -191,7 +191,6 @@ class Field
 	 */
 	public function addMiss($hit)
 	{
-		print_r($this->_miss);
 		$this->_miss[$hit[0].$hit[1]] = $hit;
 	}
 
@@ -242,31 +241,42 @@ class Field
 			}
 		}
 
-		if(!empty($this->_hit))
+		if(!empty($this->_hits))
 		{
 			foreach($this->_hits as $hit)
 			{
 				$this->_fieldMatrix[$hit[0]][$hit[1]] = FieldTerm::HIT_SHOT;
 			}
 		}
-	}
 
-	/**
-	 * @return array
-	 */
-	public function getFieldMatrix()
-	{
-		$this->_draw();
 		return $this->_fieldMatrix;
 	}
 
 	/**
-	 * @todo
 	 * @return array
 	 */
-	public function getShipMatrix()
+	public function getFieldMatrix($showShip = false)
 	{
-	
+		return ($showShip)?$this->_drawShip():$this->_draw();
+	}
+
+	/**
+	 * @return array
+	 */
+	private function _drawShip()
+	{
+		$this->_fieldMatrix = array_fill(1, Game::ROW_SIZE, array_fill(1, Game::COL_SIZE, FieldTerm::EMPTY_FIELD));
+		$ships = $this->getShipCoordinates();
+
+		foreach($ships as $ship)
+		{
+			foreach($ship as $coord)
+			{
+				$this->_fieldMatrix[$coord[0]][$coord[1]] = FieldTerm::HIT_SHOT;
+			}
+		}
+		
+		return $this->_fieldMatrix;
 	}
 
 	/**

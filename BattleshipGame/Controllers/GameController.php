@@ -41,6 +41,17 @@ class GameController
 		$this->_userInput = isset($_POST['command'])? strtoupper($_POST['command']) : '';
 	}
 
+	public function __destruct()
+	{
+		if($this->_gameEnded)
+		{
+			$this->deleteSavedGame();
+		} else {
+			$this->saveGame();
+		}
+	
+	}
+	  
 	/**
 	 * 
 	 */
@@ -50,21 +61,19 @@ class GameController
 			$this->deleteSavedGame();		
 		}
 
-		if(isset($_COOKIE[Game::COOKIE_KEY]) && $this->_userInput === 'SHOW')
+		if(isset($_COOKIE[Game::COOKIE_KEY]))
 		{
-			$this->loadGame();
-
-		} elseif(isset($_COOKIE[Game::COOKIE_KEY])){
 			$this->loadGame();	
 			$this->_processInput();
 		} else {
 			$this->startNewGame();
 		}
 
-		$this->_renderHTMLTemplate();
+		$showShip = ($this->_userInput == 'SHOW')?true:false;
+		$this->_fieldMatrix = $this->_field->getFieldMatrix($showShip);
 
-		if($this->_gameEnded)
-			deleteSavedGame();
+		$this->_renderHTMLTemplate();
+		
 	}
 
 	/**
@@ -80,6 +89,7 @@ class GameController
 		$hits = $this->_gameData['hits'];
 
 		$this->_field = Field::loadField($ship, $hits, $miss);
+
 	}
 
 	/**
@@ -101,9 +111,6 @@ class GameController
 			
 		}
 
-		// save game data
-		$this->saveGame();
-
 	}
 
 	/**
@@ -113,8 +120,8 @@ class GameController
 	public function deleteSavedGame()
 	{
 		if (isset($_COOKIE[Game::COOKIE_KEY])) {
+			setcookie(Game::COOKIE_KEY, json_encode(array()), time() - 3600, '/'); // empty value and old timestamp
 			unset($_COOKIE[Game::COOKIE_KEY]);
-			setcookie(Game::COOKIE_KEY, '', time() - 3600, '/'); // empty value and old timestamp
 		}
 	}
 
@@ -139,7 +146,7 @@ class GameController
 	 */
 	private function _validateInput($input)
 	{
-		return preg_match('/[A-J](10|[0-9])/', $input);
+		return preg_match('/^[A-J](10|[1-9])$/', $input);
 	}
 
 	/**
@@ -148,12 +155,12 @@ class GameController
 	private function _processInput()
 	{
 		// Validate input
-		if(!$this->_userInput)
+		if(!$this->_userInput || $this->_userInput === 'SHOW')
 		{
 			return;
-		} 
-		elseif(!$this->_validateInput($this->_userInput))
-		{
+		
+		} elseif(!$this->_validateInput($this->_userInput)){
+
 			$this->_outputStatus = Lang::INVALID_INPUT;
 			return;
 		}
@@ -168,25 +175,23 @@ class GameController
 			$this->_field->addHit($this->_inputCoordinates);
 
 			// Won the game
-			if(count($this->_field->getHits) === $this->_field->getShipsLength()) {
+			if(count($this->_field->getHits()) === $this->_field->getShipsLength()) {
 				$this->_gameEnded = true;
 				$this->_outputEnter = sprintf(Lang::END_OF_GAME, $this->_field->countTotalHit()); 
 
 			// Sunk any ship
 			} elseif($hitShip->isSunk($this->_field->getHits())){
-				$this->_outputStatus = sprintf(Lang::SUNK, $hitShip->getName);
+				$this->_outputStatus = sprintf(Lang::SUNK, $hitShip->getName());
 
 			// Just hit
 			} else {
-				$this->_outputStatus = sprintf(Lang::HIT, $hitShip->getName);
+				$this->_outputStatus = sprintf(Lang::HIT, $hitShip->getName());
 			
 			}
 		} else {
 			$this->_field->addMiss($this->_inputCoordinates);
 			$this->_outputStatus = Lang::MISS;
 		}
-
-		$this->saveGame();
 
 	}
 
@@ -208,9 +213,10 @@ class GameController
 	 * @todo addCheatMode
 	 * @return string
 	 */
-	private function _fieldToHTML($cheatMode = false)
+	private function _fieldToHTML()
 	{
-		$matrix = $this->_field->getFieldMatrix();
+		//$matrix = $this->_field->getFieldMatrix();
+		$matrix = $this->_fieldMatrix;
 		$colLabel = $this->_field->getColLabel();
 		$rowLabel = $this->_field->getRowLabel();
 

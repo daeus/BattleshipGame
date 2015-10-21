@@ -54,7 +54,7 @@ class Ship
 	 * @param int $fieldCol
 	 * @return array
 	 */
-	public function randomPlaceShip($shipSize, $fieldRow, $fieldCol)
+	public static function randomPlaceShip($shipSize, $fieldRow, $fieldCol)
 	{
 		// Direction of ship
 		$isHorizontal = rand(0, 1);
